@@ -58,7 +58,7 @@ if upstream_addr then
         if connect_time then
             sum(akey("upstream_connect_time", addr), conn_time())
         end
-        sum(akey("upstream_header_time", addr), head_time())
+        sum(akey("upstream_header_time", addr), head_time() or 0)
         sum(akey("upstream_response_time", addr), resp_time())
         counter(akey("upstream_status_" .. up_status(), addr))
         counter(key("next_upstream"))
