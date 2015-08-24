@@ -19,7 +19,8 @@ function sum(name, value)
 end
 
 counter(key("requests"))
-counter(key("status_" .. ngx.var.status))
+local status = tonumber(ngx.var.status)
+counter(key("status_" .. status))
 sum(key("bytes_sent"), ngx.var.bytes_sent)
 sum(key("request_time"), ngx.var.request_time)
 
@@ -60,7 +61,9 @@ if upstream_addr then
         end
         sum(akey("upstream_header_time", addr), head_time() or 0)
         sum(akey("upstream_response_time", addr), resp_time() or 0)
-        counter(akey("upstream_status_" .. up_status(), addr))
+        if status ~= 499 then
+            counter(akey("upstream_status_" .. up_status(), addr))
+        end
         counter(key("next_upstream"))
     end
 
