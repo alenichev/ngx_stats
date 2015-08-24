@@ -47,7 +47,7 @@ local upstream_addr = ngx.var.upstream_addr
 if upstream_addr then
     local connect_time = ngx.var.upstream_connect_time
     if connect_time then
-        local conn_time = connect_time:gmatch("([0-9%.]+),? ?:?")
+        conn_time = connect_time:gmatch("([0-9%.]+),? ?:?")
     end
     local head_time = ngx.var.upstream_header_time:gmatch("([0-9%.]+),? ?:?")
     local resp_time = ngx.var.upstream_response_time:gmatch("([0-9%.]+),? ?:?")
