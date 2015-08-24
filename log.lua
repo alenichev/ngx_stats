@@ -32,9 +32,11 @@ if proto then
     proto = proto:match("HTTP/(1%.[0-1])")
     if proto then
         proto = "server_protocol_" .. proto
-        counter(key(proto))
     end
+else
+    proto = "server_protocol_0.9"
 end
+counter(key(proto))
 
 local cache_status = ngx.var.upstream_cache_status
 if cache_status then
