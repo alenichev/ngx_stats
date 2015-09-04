@@ -1,0 +1,17 @@
+Sample usage
+
+http {
+    lua_shared_dict stats 1M;
+    log_by_lua_file log.lua;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location = /status {
+            default_type 'text/plain';
+            content_by_lua_file status.lua;
+        }
+    }
+}
+
