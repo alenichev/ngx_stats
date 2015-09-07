@@ -50,6 +50,7 @@ if upstream_addr then
     local conn_time = ngx.var.upstream_connect_time:gmatch("([0-9%.]+),? ?:?")
     local head_time = ngx.var.upstream_header_time:gmatch("([0-9%.]+),? ?:?")
     local resp_time = ngx.var.upstream_response_time:gmatch("([0-9%.]+),? ?:?")
+    local up_status = ngx.var.upstream_status:gmatch("(%d+),? ?:?")
 
     for addr in string.gmatch(upstream_addr, "([0-9a-zA-Z%.:/]+),? ?:?") do
         local connect_time = key("upstream_connect_time_" .. addr)
@@ -66,5 +67,12 @@ if upstream_addr then
         local r_time = stats:get(response_time) or 0
         r_time = r_time + resp_time()
         stats:set(response_time, r_time)
+
+        local upstream_key = "upstream_status_" .. up_status() .. "_" .. addr
+        local newval, err = stats:incr(key(upstream_key), 1)
+        if not newval and err == "not found" then
+            stats:add(key(upstream_key), 0)
+            stats:incr(key(upstream_key), 1)
+        end
     end
 end
