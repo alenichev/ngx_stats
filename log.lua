@@ -6,9 +6,6 @@ local status = "status_" .. ngx.var.status
 local method = ngx.var.request_method or "BAD"
 method = "request_method_" .. method:lower()
 
-local proto = ngx.var.server_protocol
-proto = "server_protocol_" .. proto:match("HTTP/(.*)")
-
 local newval, err = stats:incr("requests:" .. zone, 1)
 if not newval and err == "not found" then
     stats:add("requests:" .. zone, 0)
@@ -27,10 +24,15 @@ if not newval and err == "not found" then
     stats:incr(method .. ":" .. zone, 1)
 end
 
-local newval, err = stats:incr(proto .. ":" .. zone, 1)
-if not newval and err == "not found" then
-    stats:add(proto .. ":" .. zone, 0)
-    stats:incr(proto .. ":" .. zone, 1)
+local proto = ngx.var.server_protocol
+if proto then
+    proto = "server_protocol_" .. proto:match("HTTP/(.*)")
+
+    local newval, err = stats:incr(proto .. ":" .. zone, 1)
+    if not newval and err == "not found" then
+        stats:add(proto .. ":" .. zone, 0)
+        stats:incr(proto .. ":" .. zone, 1)
+    end
 end
 
 local bytes = stats:get("bytes_sent:" .. zone) or 0
