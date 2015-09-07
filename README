@@ -8,7 +8,7 @@ http {
         listen       80;
         server_name  localhost;
 
-        location = /status {
+        location = /stats {
             default_type 'text/plain';
             content_by_lua_file stats.lua;
         }
