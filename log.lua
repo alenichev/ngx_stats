@@ -24,6 +24,14 @@ if not newval and err == "not found" then
     stats:incr(method .. ":" .. zone, 1)
 end
 
+local bytes = stats:get("bytes_sent:" .. zone) or 0
+bytes = bytes + tonumber(ngx.var.bytes_sent)
+stats:set("bytes_sent:" .. zone, bytes)
+
+local request_time = stats:get("request_time:" .. zone) or 0
+request_time = request_time + tonumber(ngx.var.request_time)
+stats:set("request_time:" .. zone, request_time)
+
 local proto = ngx.var.server_protocol
 if proto then
     proto = "server_protocol_" .. proto:match("HTTP/(.*)")
@@ -34,11 +42,3 @@ if proto then
         stats:incr(proto .. ":" .. zone, 1)
     end
 end
-
-local bytes = stats:get("bytes_sent:" .. zone) or 0
-bytes = bytes + tonumber(ngx.var.bytes_sent)
-stats:set("bytes_sent:" .. zone, bytes)
-
-local request_time = stats:get("request_time:" .. zone) or 0
-request_time = request_time + tonumber(ngx.var.request_time)
-stats:set("request_time:" .. zone, request_time)
