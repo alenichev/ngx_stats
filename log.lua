@@ -33,6 +33,11 @@ if proto then
     counter(key(proto))
 end
 
+local cache_status = ngx.var.upstream_cache_status
+if cache_status then
+    counter(key("upstream_cache_status_" .. cache_status))
+end
+
 local upstream_addr = ngx.var.upstream_addr
 if upstream_addr then
     local conn_time = ngx.var.upstream_connect_time:gmatch("([0-9%.]+),? ?:?")
