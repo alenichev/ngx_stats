@@ -40,13 +40,18 @@ end
 
 local upstream_addr = ngx.var.upstream_addr
 if upstream_addr then
-    local conn_time = ngx.var.upstream_connect_time:gmatch("([0-9%.]+),? ?:?")
+    local connect_time = ngx.var.upstream_connect_time
+    if connect_time then
+        local conn_time = connect_time:gmatch("([0-9%.]+),? ?:?")
+    end
     local head_time = ngx.var.upstream_header_time:gmatch("([0-9%.]+),? ?:?")
     local resp_time = ngx.var.upstream_response_time:gmatch("([0-9%.]+),? ?:?")
     local up_status = ngx.var.upstream_status:gmatch("(%d+),? ?:?")
 
     for addr in string.gmatch(upstream_addr, "([0-9a-zA-Z%.:/]+),? ?:?") do
-        sum(akey("upstream_connect_time", addr), conn_time())
+        if connect_time then
+            sum(akey("upstream_connect_time", addr), conn_time())
+        end
         sum(akey("upstream_header_time", addr), head_time())
         sum(akey("upstream_response_time", addr), resp_time())
         counter(akey("upstream_status_" .. up_status(), addr))
