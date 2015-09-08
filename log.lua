@@ -2,7 +2,7 @@ local stats = ngx.shared.stats
 local zone = ngx.var.zone or "default"
 
 function key(name) return name .. ":" .. zone end
-function akey(name, addr) return key(name) .. "/" .. addr end
+function akey(name, addr) return key(name) .. "@" .. addr end
 
 local status = "status_" .. ngx.var.status
 
