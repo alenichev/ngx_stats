@@ -75,5 +75,13 @@ if upstream_addr then
             stats:add(upstream_key, 0)
             stats:incr(upstream_key, 1)
         end
+
+        local newval, err = stats:incr(key("next_upstream"), 1)
+        if not newval and err == "not found" then
+            stats:add(key("next_upstream"), 0)
+            stats:incr(key("next_upstream"), 1)
+        end
     end
+
+    stats:incr(key("next_upstream"), -1)
 end
