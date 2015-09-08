@@ -49,6 +49,7 @@ if upstream_addr then
     local up_status = ngx.var.upstream_status:gmatch("(%d+),? ?:?")
 
     for addr in string.gmatch(upstream_addr, "([0-9a-zA-Z%.:/]+),? ?:?") do
+        counter(akey("upstream_requests", addr))
         if connect_time then
             sum(akey("upstream_connect_time", addr), conn_time())
         end
