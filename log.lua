@@ -46,26 +46,43 @@ end
 
 local upstream_addr = ngx.var.upstream_addr
 if upstream_addr then
+    local total_time = 0
     local connect_time = ngx.var.upstream_connect_time
     if connect_time then
         conn_time = connect_time:gmatch("([0-9%.]+),? ?:?")
     end
-    local head_time = ngx.var.upstream_header_time:gmatch("([0-9%.]+),? ?:?")
-    local resp_time = ngx.var.upstream_response_time:gmatch("([0-9%.]+),? ?:?")
+    local header_time = ngx.var.upstream_header_time
+    if header_time then
+        head_time = header_time:gmatch("([0-9%.]+),? ?:?")
+    end
+    local response_time = ngx.var.upstream_response_time
+    if response_time then
+        resp_time = response_time:gmatch("([0-9%.]+),? ?:?")
+    end
     local up_status = ngx.var.upstream_status:gmatch("(%d+),? ?:?")
 
     for addr in string.gmatch(upstream_addr, "([0-9a-zA-Z%.:/]+),? ?:?") do
+        counter(key("upstream_requests"))
         counter(akey("upstream_requests", addr))
         if connect_time then
-            sum(akey("upstream_connect_time", addr), conn_time())
+            local ctime = conn_time()
+            sum(akey("upstream_connect_time", addr), ctime)
         end
-        sum(akey("upstream_header_time", addr), head_time() or 0)
-        sum(akey("upstream_response_time", addr), resp_time() or 0)
+        if header_time then
+            local htime = head_time() or 0
+            sum(akey("upstream_header_time", addr), htime)
+        end
+        if response_time then
+            local rtime = resp_time() or 0
+            sum(akey("upstream_response_time", addr), rtime)
+            total_time = total_time + rtime
+        end
         if status ~= 499 then
             counter(akey("upstream_status_" .. up_status(), addr))
         end
         counter(key("next_upstream"))
     end
 
+    sum(key("upstream_response_time"), total_time)
     stats:incr(key("next_upstream"), -1)
 end
