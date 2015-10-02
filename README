@@ -1,3 +1,6 @@
+Lua statistics logger for the ngx_lua based on the internal nginx
+variables.
+
 Sample usage
 
 http {
@@ -14,4 +17,12 @@ http {
         }
     }
 }
+
+Multiple zones
+
+    map $server_name $zone {
+        hostnames;
+        example.com example;
+        default default;
+    }
 
