@@ -1,68 +1,71 @@
 local stats = ngx.shared.stats
 local zone = ngx.var.zone or "default"
 
-local status = "status_" .. ngx.var.status
+function key(name) return name .. ":" .. zone end
+function akey(name, addr) return key(name) .. "@" .. addr end
+
+function counter(name)
+    local newval, err = stats:incr(name, 1)
+    if not newval and err == "not found" then
+        stats:add(name, 0)
+        stats:incr(name, 1)
+    end
+end
+
+function sum(name, value)
+    local num = stats:get(name) or 0
+    num = num + tonumber(value)
+    stats:set(name, num)
+end
+
+counter(key("requests"))
+local status = tonumber(ngx.var.status)
+counter(key("status_" .. status))
+sum(key("bytes_sent"), ngx.var.bytes_sent)
+sum(key("request_time"), ngx.var.request_time)
 
 local method = ngx.var.request_method or "BAD"
 method = "request_method_" .. method:lower()
-
-local newval, err = stats:incr("requests:" .. zone, 1)
-if not newval and err == "not found" then
-    stats:add("requests:" .. zone, 0)
-    stats:incr("requests:" .. zone, 1)
-end
-
-local newval, err = stats:incr(status .. ":" .. zone, 1)
-if not newval and err == "not found" then
-    stats:add(status .. ":" .. zone, 0)
-    stats:incr(status .. ":" .. zone, 1)
-end
-
-local newval, err = stats:incr(method .. ":" .. zone, 1)
-if not newval and err == "not found" then
-    stats:add(method .. ":" .. zone, 0)
-    stats:incr(method .. ":" .. zone, 1)
-end
-
-local bytes = stats:get("bytes_sent:" .. zone) or 0
-bytes = bytes + tonumber(ngx.var.bytes_sent)
-stats:set("bytes_sent:" .. zone, bytes)
-
-local request_time = stats:get("request_time:" .. zone) or 0
-request_time = request_time + tonumber(ngx.var.request_time)
-stats:set("request_time:" .. zone, request_time)
+counter(key(method))
 
 local proto = ngx.var.server_protocol
 if proto then
-    proto = "server_protocol_" .. proto:match("HTTP/(.*)")
-
-    local newval, err = stats:incr(proto .. ":" .. zone, 1)
-    if not newval and err == "not found" then
-        stats:add(proto .. ":" .. zone, 0)
-        stats:incr(proto .. ":" .. zone, 1)
+    proto = proto:match("HTTP/(1%.[0-1])")
+    if proto then
+        proto = "server_protocol_" .. proto
     end
+else
+    proto = "server_protocol_0.9"
+end
+counter(key(proto))
+
+local cache_status = ngx.var.upstream_cache_status
+if cache_status then
+    counter(key("upstream_cache_status_" .. cache_status))
 end
 
 local upstream_addr = ngx.var.upstream_addr
 if upstream_addr then
-    local conn_time = ngx.var.upstream_connect_time:gmatch("([0-9%.]+),? ?:?")
+    local connect_time = ngx.var.upstream_connect_time
+    if connect_time then
+        conn_time = connect_time:gmatch("([0-9%.]+),? ?:?")
+    end
     local head_time = ngx.var.upstream_header_time:gmatch("([0-9%.]+),? ?:?")
     local resp_time = ngx.var.upstream_response_time:gmatch("([0-9%.]+),? ?:?")
+    local up_status = ngx.var.upstream_status:gmatch("(%d+),? ?:?")
 
     for addr in string.gmatch(upstream_addr, "([0-9a-zA-Z%.:/]+),? ?:?") do
-        local connect_time = "upstream_connect_time_" .. addr .. ":" .. zone
-        local c_time = stats:get(connect_time) or 0
-        c_time = c_time + conn_time()
-        stats:set(connect_time, c_time)
-
-        local header_time = "upstream_header_time_" .. addr .. ":" .. zone
-        local h_time = stats:get(header_time) or 0
-        h_time = h_time + head_time()
-        stats:set(header_time, h_time)
-
-        local response_time = "upstream_response_time_" .. addr .. ":" .. zone
-        local r_time = stats:get(response_time) or 0
-        r_time = r_time + resp_time()
-        stats:set(response_time, r_time)
+        counter(akey("upstream_requests", addr))
+        if connect_time then
+            sum(akey("upstream_connect_time", addr), conn_time())
+        end
+        sum(akey("upstream_header_time", addr), head_time() or 0)
+        sum(akey("upstream_response_time", addr), resp_time() or 0)
+        if status ~= 499 then
+            counter(akey("upstream_status_" .. up_status(), addr))
+        end
+        counter(key("next_upstream"))
     end
+
+    stats:incr(key("next_upstream"), -1)
 end
