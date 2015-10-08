@@ -59,7 +59,10 @@ if upstream_addr then
     if response_time then
         resp_time = response_time:gmatch("([0-9%.]+),? ?:?")
     end
-    local up_status = ngx.var.upstream_status:gmatch("(%d+),? ?:?")
+    local upstream_status = ngx.var.upstream_status
+    if upstream_status then
+        up_status = upstream_status:gmatch("(%d+),? ?:?")
+    end
 
     for addr in string.gmatch(upstream_addr, "([0-9a-zA-Z%.:/]+),? ?:?") do
         counter(key("upstream_requests"))
@@ -77,8 +80,11 @@ if upstream_addr then
             sum(akey("upstream_response_time", addr), rtime)
             total_time = total_time + rtime
         end
-        if status ~= 499 then
-            counter(akey("upstream_status_" .. up_status(), addr))
+        if upstream_status then
+            local ustatus = up_status()
+            if ustatus then
+                counter(akey("upstream_status_" .. ustatus, addr))
+            end
         end
         counter(key("next_upstream"))
     end
