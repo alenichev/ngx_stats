@@ -77,8 +77,42 @@ if upstream_addr then
         end
         if response_time then
             local rtime = resp_time() or 0
+            rtime = tonumber(rtime)
             sum(akey("upstream_response_time", addr), rtime)
             total_time = total_time + rtime
+            if rtime > 0 or rtime < 0.1 then
+                counter(akey("upstream_response_histogram_0000_to_0100", addr))
+            end
+            if rtime > 0.1 and rtime < 0.2 then
+                counter(akey("upstream_response_histogram_0100_to_0200", addr))
+            end
+            if rtime > 0.2 and rtime < 0.3 then
+                counter(akey("upstream_response_histogram_0200_to_0300", addr))
+            end
+            if rtime > 0.3 and rtime < 0.4 then
+                counter(akey("upstream_response_histogram_0300_to_0400", addr))
+            end
+            if rtime > 0.4 and rtime < 0.5 then
+                counter(akey("upstream_response_histogram_0400_to_0500", addr))
+            end
+            if rtime > 0.5 and rtime < 0.6 then
+                counter(akey("upstream_response_histogram_0500_to_0600", addr))
+            end
+            if rtime > 0.6 and rtime < 0.7 then
+                counter(akey("upstream_response_histogram_0600_to_0700", addr))
+            end
+            if rtime > 0.7 and rtime < 0.8 then
+                counter(akey("upstream_response_histogram_0700_to_0800", addr))
+            end
+            if rtime > 0.8 and rtime < 0.9 then
+                counter(akey("upstream_response_histogram_0800_to_0900", addr))
+            end
+            if rtime > 0.9 and rtime < 1 then
+                counter(akey("upstream_response_histogram_0900_to_1000", addr))
+            end
+            if rtime > 1 then
+                counter(akey("upstream_response_histogram_1000_to_inf", addr))
+            end
         end
         if upstream_status then
             local ustatus = up_status()
