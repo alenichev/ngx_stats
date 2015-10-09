@@ -1,5 +1,5 @@
 local stats = ngx.shared.stats
-local keys = stats:get_keys()
+local keys = stats:get_keys(0)
 table.sort(keys)
 
 for k in pairs(keys) do
