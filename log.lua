@@ -80,37 +80,45 @@ if upstream_addr then
             rtime = tonumber(rtime)
             sum(akey("upstream_response_time", addr), rtime)
             total_time = total_time + rtime
-            if rtime > 0 or rtime < 0.1 then
-                counter(akey("upstream_response_histogram_0000_to_0100", addr))
-            end
-            if rtime > 0.1 and rtime < 0.2 then
+            if rtime > 0 and rtime < 0.01 then
+                counter(akey("upstream_response_histogram_0000_to_0010", addr))
+            elseif rtime > 0.01 and rtime < 0.02 then
+                counter(akey("upstream_response_histogram_0010_to_0020", addr))
+            elseif rtime > 0.02 and rtime < 0.03 then
+                counter(akey("upstream_response_histogram_0020_to_0030", addr))
+            elseif rtime > 0.03 and rtime < 0.04 then
+                counter(akey("upstream_response_histogram_0030_to_0040", addr))
+            elseif rtime > 0.04 and rtime < 0.05 then
+                counter(akey("upstream_response_histogram_0040_to_0050", addr))
+            elseif rtime > 0.05 and rtime < 0.06 then
+                counter(akey("upstream_response_histogram_0050_to_0060", addr))
+            elseif rtime > 0.06 and rtime < 0.07 then
+                counter(akey("upstream_response_histogram_0060_to_0070", addr))
+            elseif rtime > 0.07 and rtime < 0.08 then
+                counter(akey("upstream_response_histogram_0070_to_0080", addr))
+            elseif rtime > 0.08 and rtime < 0.09 then
+                counter(akey("upstream_response_histogram_0080_to_0090", addr))
+            elseif rtime > 0.09 and rtime < 0.1 then
+                counter(akey("upstream_response_histogram_0090_to_0100", addr))
+            elseif rtime > 0.1 and rtime < 0.2 then
                 counter(akey("upstream_response_histogram_0100_to_0200", addr))
-            end
-            if rtime > 0.2 and rtime < 0.3 then
+            elseif rtime > 0.2 and rtime < 0.3 then
                 counter(akey("upstream_response_histogram_0200_to_0300", addr))
-            end
-            if rtime > 0.3 and rtime < 0.4 then
+            elseif rtime > 0.3 and rtime < 0.4 then
                 counter(akey("upstream_response_histogram_0300_to_0400", addr))
-            end
-            if rtime > 0.4 and rtime < 0.5 then
+            elseif rtime > 0.4 and rtime < 0.5 then
                 counter(akey("upstream_response_histogram_0400_to_0500", addr))
-            end
-            if rtime > 0.5 and rtime < 0.6 then
+            elseif rtime > 0.5 and rtime < 0.6 then
                 counter(akey("upstream_response_histogram_0500_to_0600", addr))
-            end
-            if rtime > 0.6 and rtime < 0.7 then
+            elseif rtime > 0.6 and rtime < 0.7 then
                 counter(akey("upstream_response_histogram_0600_to_0700", addr))
-            end
-            if rtime > 0.7 and rtime < 0.8 then
+            elseif rtime > 0.7 and rtime < 0.8 then
                 counter(akey("upstream_response_histogram_0700_to_0800", addr))
-            end
-            if rtime > 0.8 and rtime < 0.9 then
+            elseif rtime > 0.8 and rtime < 0.9 then
                 counter(akey("upstream_response_histogram_0800_to_0900", addr))
-            end
-            if rtime > 0.9 and rtime < 1 then
+            elseif rtime > 0.9 and rtime < 1 then
                 counter(akey("upstream_response_histogram_0900_to_1000", addr))
-            end
-            if rtime > 1 then
+            else
                 counter(akey("upstream_response_histogram_1000_to_inf", addr))
             end
         end
