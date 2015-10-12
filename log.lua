@@ -126,6 +126,15 @@ if upstream_addr then
             local ustatus = up_status()
             if ustatus then
                 counter(akey("upstream_status_" .. ustatus, addr))
+                if string.match(ustatus, "^2.*") then
+                    counter(akey("upstream_status_2xx", addr))
+                elseif string.match(ustatus, "^3.*") then
+                    counter(akey("upstream_status_3xx", addr))
+                elseif string.match(ustatus, "^4.*") then
+                    counter(akey("upstream_status_4xx", addr))
+                elseif string.match(ustatus, "^5.*") then
+                    counter(akey("upstream_status_5xx", addr))
+                end
             end
         end
         counter(key("next_upstream"))
