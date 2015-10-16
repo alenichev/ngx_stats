@@ -21,6 +21,16 @@ end
 counter(key("requests"))
 local status = tonumber(ngx.var.status)
 counter(key("status_" .. status))
+if string.match(status, "^2.*") then
+    counter(key("status_2xx"))
+elseif string.match(status, "^3.*") then
+    counter(key("status_3xx"))
+elseif string.match(status, "^4.*") then
+    counter(key("status_4xx"))
+elseif string.match(status, "^5.*") then
+    counter(key("status_5xx"))
+end
+
 sum(key("bytes_sent"), ngx.var.bytes_sent)
 sum(key("request_time"), ngx.var.request_time)
 
