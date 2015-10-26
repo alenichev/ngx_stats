@@ -128,8 +128,16 @@ if upstream_addr then
                 counter(akey("upstream_response_histogram_0800_to_0900", addr))
             elseif rtime > 0.9 and rtime < 1 then
                 counter(akey("upstream_response_histogram_0900_to_1000", addr))
+            elseif rtime > 1 and rtime < 2 then
+                counter(akey("upstream_response_histogram_1000_to_2000", addr))
+            elseif rtime > 2 and rtime < 3 then
+                counter(akey("upstream_response_histogram_2000_to_3000", addr))
+            elseif rtime > 3 and rtime < 4 then
+                counter(akey("upstream_response_histogram_3000_to_4000", addr))
+            elseif rtime > 4 and rtime < 5 then
+                counter(akey("upstream_response_histogram_4000_to_5000", addr))
             else
-                counter(akey("upstream_response_histogram_1000_to_inf", addr))
+                counter(akey("upstream_response_histogram_5000_to_inf", addr))
             end
         end
         if upstream_status then
