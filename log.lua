@@ -38,6 +38,11 @@ local method = ngx.var.request_method or "BAD"
 method = "request_method_" .. method:lower()
 counter(key(method))
 
+-- do not proceed further
+if method == "request_method_bad" then
+    return
+end
+
 local proto = ngx.var.server_protocol
 if proto then
     proto = proto:match("HTTP/(1%.[0-1])")
